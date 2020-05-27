@@ -8,7 +8,7 @@ from django.core.serializers.python import (
     Deserializer as PythonDeserializer,
     _get_model,
 )
-from django.utils import six
+import six
 
 from djmoney.money import Money
 
