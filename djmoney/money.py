@@ -1,5 +1,4 @@
 # coding: utf-8
-import math
 import warnings
 from decimal import Decimal
 
@@ -40,7 +39,7 @@ class Money(DefaultMoney):
             self.decimal_places = DECIMAL_PLACES_PER_CURRENCY[self.currency.code]
 
         if self.decimal_places == 0:
-            amount = Decimal(math.trunc(amount))
+            amount = Decimal(int(amount))
 
         self.amount = amount
 
