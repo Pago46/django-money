@@ -1,5 +1,7 @@
 # coding: utf-8
+import math
 import warnings
+from decimal import Decimal
 
 from django.conf import settings
 from django.db.models import F
@@ -8,11 +10,12 @@ from django.utils.deconstruct import deconstructible
 from django.utils.html import avoid_wrapping, conditional_escape
 from django.utils.safestring import mark_safe
 
-from moneyed import Currency, Money as DefaultMoney
+from moneyed import Currency, Money as DefaultMoney, get_currency
 from moneyed.localization import _FORMATTER, format_money
 
-from .settings import DECIMAL_PLACES, DECIMAL_PLACES_PER_CURRENCY
+from .settings import DECIMAL_PLACES_PER_CURRENCY
 
+DEFAULT_CURRENCY_CODE = 'XYZ'
 
 __all__ = ['Money', 'Currency']
 
@@ -23,7 +26,23 @@ class Money(DefaultMoney):
     Extends functionality of Money with Django-related features.
     """
     use_l10n = None
-    decimal_places = DECIMAL_PLACES
+    decimal_places = 2
+
+    def __init__(self, amount=Decimal('0.0'), currency=DEFAULT_CURRENCY_CODE):
+        if not isinstance(amount, Decimal):
+            amount = Decimal(str(amount))
+
+        if isinstance(DECIMAL_PLACES_PER_CURRENCY, dict):
+            self.decimal_places = DECIMAL_PLACES_PER_CURRENCY[self.currency.code]
+
+        self.amount = amount
+
+        if self.decimal_places == 0:
+            self.amount = Decimal(math.trunc(amount))
+
+        if not isinstance(currency, Currency):
+            currency = get_currency(str(currency).upper())
+        self.currency = currency
 
     def __float__(self):
         warnings.warn("float() on a Money object is deprecated. Use the "
@@ -59,10 +78,6 @@ class Money(DefaultMoney):
         return self.use_l10n
 
     def __unicode__(self):
-        # check if decimal is enabled per currency
-        if isinstance(DECIMAL_PLACES_PER_CURRENCY, dict):
-            self.decimal_places = DECIMAL_PLACES_PER_CURRENCY[self.currency.code]
-
         kwargs = {'money': self, 'decimal_places': self.decimal_places}
         if self.is_localized:
             locale = get_current_locale()
