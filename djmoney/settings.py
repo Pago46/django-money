@@ -25,6 +25,7 @@ if CURRENCY_CHOICES is None:
 
 CURRENCY_CHOICES.sort(key=operator.itemgetter(1, 0))
 DECIMAL_PLACES = getattr(settings, 'CURRENCY_DECIMAL_PLACES', 2)
+DECIMAL_PLACES_PER_CURRENCY = getattr(settings, 'DECIMAL_PLACES_PER_CURRENCY', None)
 
 OPEN_EXCHANGE_RATES_URL = getattr(settings, 'OPEN_EXCHANGE_RATES_URL', 'https://openexchangerates.org/api/latest.json')
 OPEN_EXCHANGE_RATES_APP_ID = getattr(settings, 'OPEN_EXCHANGE_RATES_APP_ID', None)

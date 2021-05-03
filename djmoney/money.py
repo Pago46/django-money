@@ -11,7 +11,7 @@ from django.utils.safestring import mark_safe
 from moneyed import Currency, Money as DefaultMoney
 from moneyed.localization import _FORMATTER, format_money
 
-from .settings import DECIMAL_PLACES
+from .settings import DECIMAL_PLACES, DECIMAL_PLACES_PER_CURRENCY
 
 
 __all__ = ['Money', 'Currency']
@@ -23,6 +23,7 @@ class Money(DefaultMoney):
     Extends functionality of Money with Django-related features.
     """
     use_l10n = None
+    decimal_places = DECIMAL_PLACES
 
     def __float__(self):
         warnings.warn("float() on a Money object is deprecated. Use the "
@@ -58,7 +59,11 @@ class Money(DefaultMoney):
         return self.use_l10n
 
     def __unicode__(self):
-        kwargs = {'money': self, 'decimal_places': DECIMAL_PLACES}
+        # check if decimal is enabled per currency
+        if isinstance(DECIMAL_PLACES_PER_CURRENCY, dict):
+            self.decimal_places = DECIMAL_PLACES_PER_CURRENCY[self.currency.code]
+
+        kwargs = {'money': self, 'decimal_places': self.decimal_places}
         if self.is_localized:
             locale = get_current_locale()
             if locale:
