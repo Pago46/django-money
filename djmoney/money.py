@@ -1,4 +1,5 @@
 # coding: utf-8
+import math
 import warnings
 from decimal import Decimal
 
@@ -12,7 +13,7 @@ from django.utils.safestring import mark_safe
 from moneyed import Currency, Money as DefaultMoney, get_currency
 from moneyed.localization import _FORMATTER, format_money
 
-from .settings import DECIMAL_PLACES_PER_CURRENCY
+from .settings import DECIMAL_PLACES, DECIMAL_PLACES_PER_CURRENCY, DISPLAY_DECIMAL_PLACES_PER_CURRENCY
 
 DEFAULT_CURRENCY_CODE = 'XYZ'
 
@@ -25,7 +26,8 @@ class Money(DefaultMoney):
     Extends functionality of Money with Django-related features.
     """
     use_l10n = None
-    decimal_places = 2
+    amount_decimal_places = DECIMAL_PLACES
+    display_decimal_places = DECIMAL_PLACES
 
     def __init__(self, amount=Decimal('0.0'), currency=DEFAULT_CURRENCY_CODE):
         if not isinstance(amount, Decimal):
@@ -35,13 +37,28 @@ class Money(DefaultMoney):
             currency = get_currency(str(currency).upper())
         self.currency = currency
 
-        if isinstance(DECIMAL_PLACES_PER_CURRENCY, dict):
-            self.decimal_places = DECIMAL_PLACES_PER_CURRENCY[self.currency.code]
+        # decimal places settings override
+        try:
+            if isinstance(DECIMAL_PLACES_PER_CURRENCY, dict):
+                self.amount_decimal_places = DECIMAL_PLACES_PER_CURRENCY[self.currency.code]
 
-        if self.decimal_places == 0:
-            amount = Decimal(int(amount))
+            if isinstance(DISPLAY_DECIMAL_PLACES_PER_CURRENCY, dict):
+                self.display_decimal_places = DISPLAY_DECIMAL_PLACES_PER_CURRENCY[self.currency.code]
+        except IndexError:
+            pass
+
+        if self.amount_decimal_places == 0:
+            amount = Decimal(math.trunc(amount))
 
         self.amount = amount
+
+    def __repr__(self):
+        amount = self.amount
+
+        if self.display_decimal_places == 0:
+            amount = Decimal(int(amount))
+
+        return "Money('%s', '%s')" % (amount, self.currency)
 
     def __float__(self):
         warnings.warn("float() on a Money object is deprecated. Use the "
@@ -77,7 +94,7 @@ class Money(DefaultMoney):
         return self.use_l10n
 
     def __unicode__(self):
-        kwargs = {'money': self, 'decimal_places': self.decimal_places}
+        kwargs = {'money': self, 'decimal_places': self.display_decimal_places}
         if self.is_localized:
             locale = get_current_locale()
             if locale:
@@ -97,7 +114,6 @@ class Money(DefaultMoney):
     def __round__(self, n=None):
         amount = round(self.amount, n)
         return self.__class__(amount, self.currency)
-
 
 def get_current_locale():
     # get_language can return None starting from Django 1.8
