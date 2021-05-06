@@ -63,6 +63,7 @@ class Money(DefaultMoney):
     def __float__(self):
         warnings.warn("float() on a Money object is deprecated. Use the "
                       "'amount' attribute instead.", DeprecationWarning)
+
         return float(self.amount)
 
     def __add__(self, other):
