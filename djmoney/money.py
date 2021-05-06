@@ -44,7 +44,7 @@ class Money(DefaultMoney):
 
             if isinstance(DISPLAY_DECIMAL_PLACES_PER_CURRENCY, dict):
                 self.display_decimal_places = DISPLAY_DECIMAL_PLACES_PER_CURRENCY[self.currency.code]
-        except IndexError:
+        except (IndexError, KeyError):
             pass
 
         if self.amount_decimal_places == 0:
@@ -63,6 +63,7 @@ class Money(DefaultMoney):
     def __float__(self):
         warnings.warn("float() on a Money object is deprecated. Use the "
                       "'amount' attribute instead.", DeprecationWarning)
+
         return float(self.amount)
 
     def __add__(self, other):
