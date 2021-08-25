@@ -2,7 +2,7 @@
 from django.db.models import Case, F, Q
 from django.db.models.constants import LOOKUP_SEP
 from django.db.models.expressions import BaseExpression
-from django.db.models.fields import FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist
 from six import wraps
 
 from .._compat import smart_unicode
