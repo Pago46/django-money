@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Django-money documentation build configuration file, created by
 # sphinx-quickstart on Thu Sep 29 11:06:12 2016.
@@ -12,16 +11,18 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys
 import os
+import sys
+
+import sphinx_rtd_theme
+from djmoney import __version__
+
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('..'))
 
-import sphinx_rtd_theme
-from djmoney import __version__
 
 # -- General configuration ------------------------------------------------
 
